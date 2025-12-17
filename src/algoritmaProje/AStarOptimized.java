@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 public class AStarOptimized implements PathFinder {
 
     @Override
-    public SimulationResult runSimulation(Graph graph, Node start, Node end) {
+    public SimulationResult run(Graph graph, Node start, Node end) {
         long startTime = System.nanoTime();
 
         // 1. Setup Data Structures
@@ -65,7 +65,7 @@ public class AStarOptimized implements PathFinder {
 
         return new SimulationResult(
             "A*", 
-            graph.getAllNodes().size(), 
+            graph.getNodes().size(),
             duration, 
             nodesVisited, 
             (int) finalCost

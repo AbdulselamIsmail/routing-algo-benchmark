@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 public class DijkstraOptimized implements PathFinder {
 
     @Override
-    public SimulationResult runSimulation(Graph graph, Node start, Node end) {
+    public SimulationResult run(Graph graph, Node start, Node end) {
         long startTime = System.nanoTime();
         
         // 1. Setup Data Structures
@@ -60,7 +60,7 @@ public class DijkstraOptimized implements PathFinder {
         // Return the metrics
         return new SimulationResult(
             "Dijkstra", 
-            graph.getAllNodes().size(), 
+            graph.getNodes().size(),
             duration, 
             nodesVisited, 
             (int) finalCost // Casting double cost to int for the result object

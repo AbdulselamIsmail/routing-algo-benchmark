@@ -1,25 +1,46 @@
 package algoritmaProje;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
-        GraphGenerator gen = new GraphGenerator();
-        Graph myGraph = gen.generateGraph(10); // Now returns a Graph object
+        System.out.println("--- STARTING NETWORK SIMULATION ---");
 
-        List<Node> allNodes = myGraph.getNodes();
+        // 1. Setup Tools
+        GraphGenerator generator = new GraphGenerator();
+        CsvWriter writer = new CsvWriter();
+        PathFinder dijkstra = new DijkstraOptimized();
+        PathFinder aStar = new AStarOptimized();
+        List<SimulationResult> results = new ArrayList<>();
+        Random rand = new Random();
 
-        System.out.println("Graph generated with " + allNodes.size() + " nodes.");
+        // 2. Define Test Sizes (The "Big Data" part)
+        int[] sizes = {100, 500, 1000, 2000};
 
-        // Pick the first node
-        Node first = allNodes.get(0);
+        // 3. The Simulation Loop
+        for (int size : sizes) {
+            System.out.print("Simulating Graph Size: " + size + " ... ");
 
-        // Get its neighbors from the Central Manager (Graph class)
-        List<Edge> connections = myGraph.getNeighbors(first);
+            // Create fresh graph
+            Graph graph = generator.generateGraph(size);
+            List<Node> nodes = new ArrayList<>(graph.getNodes());
 
-        System.out.println("Checking Node: " + first.id);
-        for (Edge e : connections) {
-            System.out.println(" -> Connects to " + e.target.id + " (Cost: " + e.weight + ")");
+            // Run 5 races per size to get a good average
+            for (int i = 0; i < 5; i++) {
+                Node start = nodes.get(rand.nextInt(nodes.size()));
+                Node end = nodes.get(rand.nextInt(nodes.size()));
+
+                // Run both algorithms on the exact same start/end points
+                results.add(dijkstra.run(graph, start, end));
+                results.add(aStar.run(graph, start, end));
+            }
+            System.out.println("Done.");
         }
+
+        // 4. Save to File
+        writer.writeToCSV("ProjectResults.csv", results);
+        System.out.println("--- COMPLETE. Check ProjectResults.csv ---");
     }
 }
