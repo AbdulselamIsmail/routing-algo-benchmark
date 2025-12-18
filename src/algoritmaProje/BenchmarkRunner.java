@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Main {
+public class BenchmarkRunner {
     public static void main(String[] args) {
         System.out.println("--- STARTING NETWORK SIMULATION ---");
 
@@ -40,7 +40,7 @@ public class Main {
         }
 
         // 4. Save to File
-        writer.writeToCSV("ProjectResults.csv", results);
+        writer.writeToCSV("benchmark_results.csv", results);
         System.out.println("--- COMPLETE. Check ProjectResults.csv ---");
     }
 }

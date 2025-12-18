@@ -26,7 +26,7 @@ public class VisualizerFrame extends JFrame {
     // UI COLORS (Modern Dark Theme)
     private final Color PRIMARY_COLOR = new Color(45, 45, 48);   // Dark Gray Background
     private final Color ACCENT_COLOR = new Color(0, 122, 204);   // VS Code Blue
-    private final Color TEXT_COLOR = Color.WHITE;
+    private final Color TEXT_COLOR = Color.BLACK;
 
     public VisualizerFrame() {
         setTitle("Algoritma Proje - Pathfinding Visualizer");
