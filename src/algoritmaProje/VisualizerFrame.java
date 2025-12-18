@@ -31,7 +31,7 @@ public class VisualizerFrame extends JFrame {
     public VisualizerFrame() {
         setTitle("Algoritma Proje - Pathfinding Visualizer");
         setSize(1000, 720); // Bigger window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // --- 1. TOP HEADER ---
@@ -64,9 +64,9 @@ public class VisualizerFrame extends JFrame {
         controlsPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
 
         // Create Custom Buttons
-        JButton btnGenerate = createStyledButton("⚡ Generate New Map");
-        JButton btnDijkstra = createStyledButton("🔵 Run Dijkstra");
-        JButton btnAStar = createStyledButton("🟢 Run A* (Heuristic)");
+        JButton btnGenerate = createStyledButton("Generate New Map");
+        JButton btnDijkstra = createStyledButton("Run Dijkstra");
+        JButton btnAStar = createStyledButton("Run A* (Heuristic)");
 
         controlsPanel.add(btnGenerate);
         controlsPanel.add(btnDijkstra);

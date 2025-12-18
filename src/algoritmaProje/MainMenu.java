@@ -72,14 +72,8 @@ public class MainMenu extends JFrame {
     }
 
     private void showChartWindow() {
-        StatsEngine engine = new StatsEngine();
-        Map<Integer, Map<String, Double>> data = engine.calculateAverages("benchmark_results.csv"); // Must match filename in CsvWriter
-
-        JFrame chartFrame = new JFrame("Performance Analysis (Lower is Better)");
-        chartFrame.setSize(800, 600);
-        chartFrame.add(new ChartPanel(data));
-        chartFrame.setLocationRelativeTo(null);
-        chartFrame.setVisible(true);
+        // Just open our new fancy frame
+        new AnalysisFrame().setVisible(true);
     }
 
     // --- GUI HELPERS ---

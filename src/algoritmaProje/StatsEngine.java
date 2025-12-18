@@ -6,31 +6,38 @@ import java.util.*;
 
 public class StatsEngine {
 
-    // Holds data like: 1000 -> { "Dijkstra": 550.0, "A*": 120.0 }
-    public Map<Integer, Map<String, Double>> calculateAverages(String csvFile) {
-        Map<Integer, Map<String, List<Integer>>> accumulator = new TreeMap<>();
+    /**
+     * Reads the CSV and calculates average for a specific metric.
+     * metricType = "VISITED" (Index 3) or "TIME" (Index 2)
+     */
+    public Map<Integer, Map<String, Double>> getStats(String csvFile, String metricType) {
+        Map<Integer, Map<String, List<Double>>> accumulator = new TreeMap<>();
+
+        // CSV Indices: Algorithm(0), Size(1), Time(2), Visited(3), Cost(4)
+        int targetIndex = metricType.equals("TIME") ? 2 : 3;
 
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             String line = br.readLine(); // Skip Header
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                // Expected: Algorithm, Size, Time, Visited, Cost
-                if (parts.length < 4) continue;
+                if (parts.length < 5) continue;
 
                 String algo = parts[0];
                 int size = Integer.parseInt(parts[1]);
-                int visited = Integer.parseInt(parts[3]); // We chart "Nodes Visited" (Efficiency)
+                double value = Double.parseDouble(parts[targetIndex]);
 
-                // Initialize maps if empty
+                // CONVERSION: If looking at Time (ns), convert to Milliseconds (ms)
+                if (metricType.equals("TIME")) {
+                    value = value / 1_000_000.0;
+                }
+
                 accumulator.putIfAbsent(size, new HashMap<>());
                 accumulator.get(size).putIfAbsent(algo, new ArrayList<>());
-
-                // Add value to list
-                accumulator.get(size).get(algo).add(visited);
+                accumulator.get(size).get(algo).add(value);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return new HashMap<>();
         }
 
         // Calculate Averages
@@ -38,9 +45,9 @@ public class StatsEngine {
         for (int size : accumulator.keySet()) {
             averages.put(size, new HashMap<>());
             for (String algo : accumulator.get(size).keySet()) {
-                List<Integer> values = accumulator.get(size).get(algo);
+                List<Double> values = accumulator.get(size).get(algo);
                 double sum = 0;
-                for (int v : values) sum += v;
+                for (double v : values) sum += v;
                 averages.get(size).put(algo, sum / values.size());
             }
         }
