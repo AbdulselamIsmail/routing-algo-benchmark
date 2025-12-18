@@ -62,55 +62,55 @@ public class GraphPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        // Safety check: Don't draw if graph is empty
         if (graph == null) return;
 
         Graphics2D g2 = (Graphics2D) g;
-        // Turn on "Anti-aliasing" (makes circles/lines smooth, not pixelated)
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Calculate Scale (Window Width / 1000)
-        scaleX = getWidth() / 1000.0;
-        scaleY = getHeight() / 1000.0;
+        // Update Scale
+        scaleX = (double) getWidth() / 1000.0;
+        scaleY = (double) getHeight() / 1000.0;
 
-        // 1. Draw Edges (All connections)
+        // 1. Draw Edges (Background Lines)
         g2.setColor(Style.EDGE_COLOR);
         g2.setStroke(Style.THIN_LINE);
-
-        // We iterate over all nodes to draw their outgoing edges
-        for (Node node : graph.getNodes()) {
+        for (Node node : graph.getNodes()) { // changed to getNodes() to match your fix
             for (Edge edge : graph.getNeighbors(node)) {
                 drawLine(g2, node, edge.target);
             }
         }
 
-        // 2. Draw Visited Nodes (Animation)
+        // --- NEW: Draw "Clickable" Nodes (Subtle Gray Dots) ---
+        // This makes them visible so you know where to click!
+        g2.setColor(new Color(200, 200, 200)); // Light faint gray
+        for (Node n : graph.getNodes()) {
+            drawDot(g2, n, 6); // Size 6 (Small but visible)
+        }
+        // -----------------------------------------------------
+
+        // 2. Draw Visited Nodes (Animation - Yellow)
         g2.setColor(Style.VISITED_COLOR);
         for (Node n : visitedNodes) {
-            drawDot(g2, n, 8); // Size 8
+            drawDot(g2, n, 8); // Slightly larger than base nodes
         }
 
-        // 3. Draw The Final Path
-        if (!finalPath.isEmpty()) {
+        // 3. Draw The Final Path (Blue)
+        if (finalPath != null && finalPath.size() > 1) {
             g2.setColor(Style.PATH_COLOR);
             g2.setStroke(Style.THICK_LINE);
-
             for (int i = 0; i < finalPath.size() - 1; i++) {
-                Node a = finalPath.get(i);
-                Node b = finalPath.get(i+1);
-                drawLine(g2, a, b);
+                drawLine(g2, finalPath.get(i), finalPath.get(i+1));
             }
         }
 
-        // 4. Draw Start & End Nodes (Big and bright)
+        // 4. Draw Start/End Points (Big and Bright)
         if (startNode != null) {
             g2.setColor(Style.START_NODE_COLOR);
-            drawDot(g2, startNode, 12); // Size 12
+            drawDot(g2, startNode, 15);
         }
         if (endNode != null) {
             g2.setColor(Style.END_NODE_COLOR);
-            drawDot(g2, endNode, 12);
+            drawDot(g2, endNode, 15);
         }
     }
 
