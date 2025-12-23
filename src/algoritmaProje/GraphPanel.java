@@ -1,5 +1,7 @@
 package algoritmaProje;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashSet;
@@ -14,9 +16,9 @@ public class GraphPanel extends JPanel {
     private Node endNode;
 
     // Track Nodes and Edges for animation
-    private Set<Node> visitedNodes = new HashSet<>();
-    private List<Node[]> visitedEdges = new ArrayList<>(); // Stores pairs: [Parent, Child]
-    private List<Node> finalPath = new ArrayList<>();
+    private Set<Node> visitedNodes = ConcurrentHashMap.newKeySet();
+    private List<Node[]> visitedEdges = new CopyOnWriteArrayList<>();
+    private List<Node> finalPath = new CopyOnWriteArrayList<>();
 
     private Color currentVisitedColor = new Color(255, 200, 0, 150);
     private double scaleX = 1.0;
