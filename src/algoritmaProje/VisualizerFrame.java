@@ -1,5 +1,6 @@
 package algoritmaProje;
 
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -8,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class VisualizerFrame extends JFrame {
+
 
     private GraphPanel graphPanel;
     private Graph currentGraph;
@@ -23,6 +25,7 @@ public class VisualizerFrame extends JFrame {
     private GraphGenerator generator = new GraphGenerator();
     private PathFinder dijkstra = new DijkstraOptimized();
     private PathFinder aStar = new AStarOptimized();
+    private PathFinder bellmanFord = new BellmanFord();
 
     // UI COLORS
     private final Color PRIMARY_COLOR = Color.WHITE;
@@ -109,11 +112,13 @@ public class VisualizerFrame extends JFrame {
         JButton btnGenerate = createStyledButton("Generate");
         JButton btnDijkstra = createStyledButton("Run Dijkstra");
         JButton btnAStar = createStyledButton("Run A*");
+        JButton btnBellman = createStyledButton("Run Bellman"); // <--- ADD THIS
 
         controlsPanel.add(Box.createHorizontalStrut(20)); // Spacer
         controlsPanel.add(btnGenerate);
         controlsPanel.add(btnDijkstra);
         controlsPanel.add(btnAStar);
+        controlsPanel.add(btnBellman);
 
         add(controlsPanel, BorderLayout.SOUTH);
 
@@ -121,6 +126,7 @@ public class VisualizerFrame extends JFrame {
         btnGenerate.addActionListener(e -> generateNewMap());
         btnDijkstra.addActionListener(e -> runAlgorithm(dijkstra, "Dijkstra"));
         btnAStar.addActionListener(e -> runAlgorithm(aStar, "A*"));
+        btnBellman.addActionListener(e -> runAlgorithm(bellmanFord, "Bellman-Ford"));
 
         // Initialize
         generateNewMap();
@@ -171,12 +177,11 @@ public class VisualizerFrame extends JFrame {
 
         // --- NEW: COLOR LOGIC ---
         if (name.equals("Dijkstra")) {
-            // Dijkstra = Cyan (Like water flooding everywhere)
-            // Alpha 150 means slightly transparent
-            graphPanel.setVisitedColor(new Color(0, 255, 255, 150));
+            graphPanel.setVisitedColor(new Color(0, 255, 255, 150)); // Cyan
+        } else if (name.equals("A*")) {
+            graphPanel.setVisitedColor(new Color(255, 165, 0, 150)); // Orange
         } else {
-            // A* = Orange (Like a focused beam)
-            graphPanel.setVisitedColor(new Color(255, 165, 0, 150));
+            graphPanel.setVisitedColor(new Color(138, 43, 226, 150));
         }
         // ------------------------
 
@@ -200,10 +205,22 @@ public class VisualizerFrame extends JFrame {
             };
 
             // Smart Speed Calculation
+            // Smart Speed Calculation
             int currentSize = currentGraph.getNodes().size();
-            int delay = 15;
-            if (currentSize > 400) delay = 5;
-            if (currentSize > 800) delay = 1;
+            int delay;
+
+            if (name.equals("Bellman-Ford")) {
+                // Bellman-Ford is fundamentally different. It needs to be SLOWER
+                // per step so you can see the "waves" of updates.
+                // We lock it to 10-50ms depending on size, never 1ms.
+                delay = (currentSize < 100) ? 50 : 10;
+            } else {
+                // Dijkstra & A* are fast, so we speed up the animation
+                // for large graphs to prevent boredom.
+                delay = 15;
+                if (currentSize > 400) delay = 5;
+                if (currentSize > 800) delay = 1;
+            }
 
             algorithm.runVisualSimulation(currentGraph, startNode, endNode, listener, delay);
         }).start();

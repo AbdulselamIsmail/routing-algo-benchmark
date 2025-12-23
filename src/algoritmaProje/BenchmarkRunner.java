@@ -13,6 +13,7 @@ public class BenchmarkRunner {
         CsvWriter writer = new CsvWriter();
         PathFinder dijkstra = new DijkstraOptimized();
         PathFinder aStar = new AStarOptimized();
+        PathFinder bellman = new BellmanFord();
         List<SimulationResult> results = new ArrayList<>();
         Random rand = new Random();
 
@@ -35,6 +36,7 @@ public class BenchmarkRunner {
                 // Run both algorithms on the exact same start/end points
                 results.add(dijkstra.run(graph, start, end));
                 results.add(aStar.run(graph, start, end));
+                results.add(bellman.run(graph, start, end));
             }
             System.out.println("Done.");
         }

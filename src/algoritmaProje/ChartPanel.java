@@ -10,8 +10,9 @@ public class ChartPanel extends JPanel {
     private String yAxisLabel = "Value";
 
     // Colors
-    private final Color COLOR_DIJKSTRA = new Color(54, 162, 235);
-    private final Color COLOR_ASTAR = new Color(75, 192, 192);
+    private final Color COLOR_DIJKSTRA = new Color(54, 162, 235); // Blue
+    private final Color COLOR_ASTAR = new Color(75, 192, 192);    // Green
+    private final Color COLOR_BELLMAN = new Color(138, 43, 226);  // Purple (New)
     private final Color TEXT_COLOR = new Color(80, 80, 80);
     private final Color GRID_COLOR = new Color(220, 220, 220);
 
@@ -56,7 +57,6 @@ public class ChartPanel extends JPanel {
                 if (val > maxVal) maxVal = val;
             }
         }
-        // Avoid 0 division and add headroom
         maxVal = (maxVal == 0) ? 1 : maxVal * 1.1;
 
         // 2. Draw Grid
@@ -72,46 +72,64 @@ public class ChartPanel extends JPanel {
             g2.setColor(GRID_COLOR);
             g2.drawLine(marginLeft, y, width - marginRight, y);
 
-            // Y-Axis Number Formatting
             g2.setColor(TEXT_COLOR);
-            String label = formatValue(value); // Uses helper method
+            String label = formatValue(value);
             FontMetrics fm = g2.getFontMetrics();
             g2.drawString(label, marginLeft - fm.stringWidth(label) - 10, y + 5);
         }
 
-        // 3. Draw Bars
+        // --- 3. DRAW BARS (ADJUSTED FOR 3 ALGORITHMS) ---
         int numGroups = data.size();
         int groupWidth = chartWidth / numGroups;
-        int barWidth = (int) (groupWidth * 0.3);
-        int spacing = (int) (groupWidth * 0.1);
-        int x = marginLeft + (groupWidth / 2) - barWidth - (spacing/2);
 
-        g2.setFont(new Font("Segoe UI", Font.BOLD, 11)); // Slightly smaller font for precision text
+        // Calculate new widths to fit 3 bars + spacing
+        // We divide the group space into roughly 4 parts (3 bars + gaps)
+        int barWidth = (int) (groupWidth * 0.22);
+        int spacing = (int) (groupWidth * 0.05);
+
+        // Calculate starting X to center the cluster of 3 bars
+        int totalClusterWidth = (barWidth * 3) + (spacing * 2);
+        int x = marginLeft + (groupWidth / 2) - (totalClusterWidth / 2);
+
+        g2.setFont(new Font("Segoe UI", Font.BOLD, 10)); // Smaller font to fit labels
 
         for (Integer size : data.keySet()) {
             Map<String, Double> algos = data.get(size);
             double dVal = algos.getOrDefault("Dijkstra", 0.0);
             double aVal = algos.getOrDefault("A*", 0.0);
+            double bVal = algos.getOrDefault("Bellman-Ford", 0.0); // Get Bellman Data
 
             int h1 = (int) ((dVal / maxVal) * chartHeight);
             int h2 = (int) ((aVal / maxVal) * chartHeight);
+            int h3 = (int) ((bVal / maxVal) * chartHeight);
 
-            // Dijkstra
+            int y1 = marginTop + chartHeight - h1;
+            int y2 = marginTop + chartHeight - h2;
+            int y3 = marginTop + chartHeight - h3;
+
+            // 1. Dijkstra (Blue)
             g2.setColor(COLOR_DIJKSTRA);
-            g2.fillRoundRect(x, marginTop + chartHeight - h1, barWidth, h1, 10, 10);
+            g2.fillRoundRect(x, y1, barWidth, h1, 8, 8);
             g2.setColor(Color.BLACK);
-            drawCenteredString(g2, formatValue(dVal), x + barWidth/2, marginTop + chartHeight - h1 - 5);
+            drawCenteredString(g2, formatValue(dVal), x + barWidth/2, y1 - 5);
 
-            // A*
+            // 2. A* (Green)
             g2.setColor(COLOR_ASTAR);
-            g2.fillRoundRect(x + barWidth + spacing, marginTop + chartHeight - h2, barWidth, h2, 10, 10);
+            g2.fillRoundRect(x + barWidth + spacing, y2, barWidth, h2, 8, 8);
             g2.setColor(Color.BLACK);
-            drawCenteredString(g2, formatValue(aVal), x + barWidth + spacing + barWidth/2, marginTop + chartHeight - h2 - 5);
+            drawCenteredString(g2, formatValue(aVal), x + barWidth + spacing + barWidth/2, y2 - 5);
+
+            // 3. Bellman-Ford (Purple)
+            g2.setColor(COLOR_BELLMAN);
+            g2.fillRoundRect(x + (barWidth + spacing) * 2, y3, barWidth, h3, 8, 8);
+            g2.setColor(Color.BLACK);
+            drawCenteredString(g2, formatValue(bVal), x + (barWidth + spacing) * 2 + barWidth/2, y3 - 5);
 
             // X-Axis Label
             g2.setColor(TEXT_COLOR);
             g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
-            drawCenteredString(g2, size + " Nodes", x + barWidth + (spacing/2), marginTop + chartHeight + 25);
+            // Center label under the middle bar (A*)
+            drawCenteredString(g2, size + " Nodes", x + barWidth + spacing + (barWidth/2), marginTop + chartHeight + 25);
 
             x += groupWidth;
         }
@@ -121,15 +139,12 @@ public class ChartPanel extends JPanel {
         drawLegend(g2, width);
     }
 
-    // --- NEW: SMART FORMATTER ---
+    // --- HELPER METHODS ---
+
     private String formatValue(double val) {
         if (yAxisLabel.contains("Time")) {
-            // If it's Time, show 3 decimal places + "ms"
-            // Example: "0.452 ms"
             return String.format("%.3f ms", val);
         } else {
-            // If it's Nodes, show Integer
-            // Example: "550"
             return String.format("%.0f", val);
         }
     }
@@ -155,15 +170,26 @@ public class ChartPanel extends JPanel {
         int legendY = 30;
         g2.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        g2.setColor(COLOR_DIJKSTRA);
-        g2.fillRoundRect(width/2 - 150, legendY, iconSize, iconSize, 5, 5);
-        g2.setColor(TEXT_COLOR);
-        g2.drawString("Dijkstra", width/2 - 130, legendY + 12);
+        // Center the legend items
+        int startX = width/2 - 200;
 
-        g2.setColor(COLOR_ASTAR);
-        g2.fillRoundRect(width/2 - 30, legendY, iconSize, iconSize, 5, 5);
+        // Dijkstra
+        g2.setColor(COLOR_DIJKSTRA);
+        g2.fillRoundRect(startX, legendY, iconSize, iconSize, 5, 5);
         g2.setColor(TEXT_COLOR);
-        g2.drawString("A*", width/2 - 10, legendY + 12);
+        g2.drawString("Dijkstra", startX + 20, legendY + 12);
+
+        // A*
+        g2.setColor(COLOR_ASTAR);
+        g2.fillRoundRect(startX + 100, legendY, iconSize, iconSize, 5, 5);
+        g2.setColor(TEXT_COLOR);
+        g2.drawString("A*", startX + 120, legendY + 12);
+
+        // Bellman-Ford
+        g2.setColor(COLOR_BELLMAN);
+        g2.fillRoundRect(startX + 180, legendY, iconSize, iconSize, 5, 5);
+        g2.setColor(TEXT_COLOR);
+        g2.drawString("Bellman-Ford", startX + 200, legendY + 12);
     }
 
     private void drawCenteredString(Graphics2D g, String text, int x, int y) {
