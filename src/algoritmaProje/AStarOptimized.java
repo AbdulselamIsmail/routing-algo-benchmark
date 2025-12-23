@@ -55,7 +55,10 @@ public class AStarOptimized implements PathFinder {
 
             // 1. NOTIFY UI
             if (listener != null) {
-                listener.onNodeVisited(current.node);
+                // Get the parent of the current node to draw the line
+                Node parent = parentMap.get(current.node);
+                listener.onNodeVisited(current.node, parent);
+
                 try { Thread.sleep(delayMS); } catch (InterruptedException e) {}
             }
 

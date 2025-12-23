@@ -54,11 +54,14 @@ public class DijkstraOptimized implements PathFinder {
         while (!pq.isEmpty()) {
             QueueNode current = pq.poll();
 
-            // 1. NOTIFY UI: "I am visiting this node!"
+            // 1. NOTIFY UI
             if (listener != null) {
-                listener.onNodeVisited(current.node);
+                // Get the parent of the current node to draw the line
+                Node parent = parentMap.get(current.node);
+                listener.onNodeVisited(current.node, parent);
+
                 try {
-                    Thread.sleep(delayMS); // The "Slow Motion" Pause
+                    Thread.sleep(delayMS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

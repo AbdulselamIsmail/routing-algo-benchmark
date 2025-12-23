@@ -1,9 +1,10 @@
 package algoritmaProje;
 
-public interface VisualizerListener {
-    // Called whenever the algorithm pops a node from the PriorityQueue
-    void onNodeVisited(Node node);
+import java.util.List;
 
-    // Called when the path is found (to draw the final blue line)
-    void onPathFound(java.util.List<Node> path);
+public interface VisualizerListener {
+    // UPDATED: Now accepts 'parent' so we can draw the line connecting them
+    void onNodeVisited(Node node, Node parent);
+
+    void onPathFound(List<Node> path);
 }

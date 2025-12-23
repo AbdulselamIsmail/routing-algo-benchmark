@@ -13,22 +13,18 @@ public class GraphPanel extends JPanel {
     private Node startNode;
     private Node endNode;
 
-    // Dynamic lists to track animation state
+    // Track Nodes and Edges for animation
     private Set<Node> visitedNodes = new HashSet<>();
+    private List<Node[]> visitedEdges = new ArrayList<>(); // Stores pairs: [Parent, Child]
     private List<Node> finalPath = new ArrayList<>();
 
-    // --- NEW: Dynamic Color Field (Defaults to Yellow) ---
     private Color currentVisitedColor = new Color(255, 200, 0, 150);
-
-    // SCALING: The Graph is 1000x1000, but the window size might change.
     private double scaleX = 1.0;
     private double scaleY = 1.0;
 
     public GraphPanel() {
         this.setBackground(Style.CANVAS_BACKGROUND);
     }
-
-    // --- SETUP METHODS ---
 
     public void setGraph(Graph graph) {
         this.graph = graph;
@@ -41,21 +37,24 @@ public class GraphPanel extends JPanel {
         repaint();
     }
 
-    public void reset() {
-        visitedNodes.clear();
-        finalPath.clear();
-        repaint();
-    }
-
-    // --- NEW: Setter to change animation color (Cyan vs Orange) ---
     public void setVisitedColor(Color c) {
         this.currentVisitedColor = c;
     }
 
-    // --- ANIMATION METHODS ---
+    public void reset() {
+        visitedNodes.clear();
+        visitedEdges.clear(); // Clear lines too
+        finalPath.clear();
+        repaint();
+    }
 
-    public void addVisitedNode(Node node) {
+    // --- UPDATED ANIMATION METHOD ---
+    public void addVisitedNode(Node node, Node parent) {
         visitedNodes.add(node);
+        // If there is a parent, store the connection so we can draw the line
+        if (parent != null) {
+            visitedEdges.add(new Node[]{parent, node});
+        }
         repaint();
     }
 
@@ -63,8 +62,6 @@ public class GraphPanel extends JPanel {
         this.finalPath = path;
         repaint();
     }
-
-    // --- THE DRAWING ENGINE ---
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -74,11 +71,10 @@ public class GraphPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Update Scale
         scaleX = (double) getWidth() / 1000.0;
         scaleY = (double) getHeight() / 1000.0;
 
-        // 1. Draw Edges (Background Lines)
+        // 1. Draw Gray Background Edges
         g2.setColor(Style.EDGE_COLOR);
         g2.setStroke(Style.THIN_LINE);
         for (Node node : graph.getNodes()) {
@@ -87,20 +83,27 @@ public class GraphPanel extends JPanel {
             }
         }
 
-        // 2. Draw "Clickable" Nodes (Subtle Gray Dots)
+        // 2. Draw Faint Gray Nodes
         g2.setColor(new Color(200, 200, 200));
         for (Node n : graph.getNodes()) {
             drawDot(g2, n, 6);
         }
 
-        // 3. Draw Visited Nodes (Animation - NOW DYNAMIC)
-        // We use the variable 'currentVisitedColor' instead of Style.VISITED_COLOR
+        // --- NEW: Draw Visited Lines (The "Web" Effect) ---
+        g2.setColor(currentVisitedColor);
+        g2.setStroke(new BasicStroke(2)); // Slightly thicker than background lines
+        for (Node[] pair : visitedEdges) {
+            drawLine(g2, pair[0], pair[1]);
+        }
+        // --------------------------------------------------
+
+        // 3. Draw Visited Nodes (The Dots)
         g2.setColor(currentVisitedColor);
         for (Node n : visitedNodes) {
             drawDot(g2, n, 8);
         }
 
-        // 4. Draw The Final Path (Blue)
+        // 4. Draw Final Path
         if (finalPath != null && finalPath.size() > 1) {
             g2.setColor(Style.PATH_COLOR);
             g2.setStroke(Style.THICK_LINE);
@@ -109,7 +112,7 @@ public class GraphPanel extends JPanel {
             }
         }
 
-        // 5. Draw Start/End Points (Big and Bright)
+        // 5. Start/End
         if (startNode != null) {
             g2.setColor(Style.START_NODE_COLOR);
             drawDot(g2, startNode, 15);
@@ -119,8 +122,6 @@ public class GraphPanel extends JPanel {
             drawDot(g2, endNode, 15);
         }
     }
-
-    // --- HELPER METHODS ---
 
     private void drawDot(Graphics2D g2, Node n, int size) {
         int x = (int) (n.x * scaleX);
@@ -138,13 +139,10 @@ public class GraphPanel extends JPanel {
 
     public Node getNodeAt(int mouseX, int mouseY) {
         if (graph == null) return null;
-
         double graphX = mouseX / scaleX;
         double graphY = mouseY / scaleY;
-
         Node closest = null;
         double minDistance = Double.MAX_VALUE;
-
         for (Node n : graph.getNodes()) {
             double dist = Math.sqrt(Math.pow(n.x - graphX, 2) + Math.pow(n.y - graphY, 2));
             if (dist < 50 && dist < minDistance) {

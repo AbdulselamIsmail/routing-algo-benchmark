@@ -184,7 +184,11 @@ public class VisualizerFrame extends JFrame {
             long startTime = System.currentTimeMillis();
             VisualizerListener listener = new VisualizerListener() {
                 @Override
-                public void onNodeVisited(Node node) { graphPanel.addVisitedNode(node); }
+                // UPDATE THIS LINE:
+                public void onNodeVisited(Node node, Node parent) {
+                    graphPanel.addVisitedNode(node, parent);
+                }
+
                 @Override
                 public void onPathFound(List<Node> path) {
                     graphPanel.setPath(path);
