@@ -205,7 +205,6 @@ public class VisualizerFrame extends JFrame {
             };
 
             // Smart Speed Calculation
-            // Smart Speed Calculation
             int currentSize = currentGraph.getNodes().size();
             int delay;
 

@@ -28,8 +28,8 @@ public class BenchmarkRunner {
             Graph graph = generator.generateGraph(size);
             List<Node> nodes = new ArrayList<>(graph.getNodes());
 
-            // Run 5 races per size to get a good average
-            for (int i = 0; i < 5; i++) {
+            // Run 100 races per size to get a good average
+            for (int i = 0; i < 100; i++) {
                 Node start = nodes.get(rand.nextInt(nodes.size()));
                 Node end = nodes.get(rand.nextInt(nodes.size()));
 
